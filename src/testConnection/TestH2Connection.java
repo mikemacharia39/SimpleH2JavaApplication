@@ -5,17 +5,24 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import org.h2.tools.Server;
 
 public class TestH2Connection {
 
 	static Connection conn;
 	static String connectionName;
 	Statement statement;
+	Server server;
 	public void setConnection() {
 	
-		connectionName = "jdbc:h2:~/H2Databases/testH2";
+		//connectionName = "jdbc:h2:tcp://localhost/file:C:/Program Files/SimpleSolution/ssposh2db";
+		//connectionName = "jdbc:h2:file:C:/Program Files/Java/testH2";
+		//connectionName = "jdbc:h2:tcp://localhost/~/H2Databases/testH2";
+		//connectionName = "jdbc:h2:~/H2Databases/ssposh2db";
 		
 		try {
+			server = Server.createTcpServer().start();
+			
 			Class.forName("org.h2.Driver").newInstance();
 			conn = DriverManager.getConnection(connectionName, "root", "h2password");
 			
@@ -33,6 +40,7 @@ public class TestH2Connection {
 		try {
 			if(!conn.isClosed()) {
 				conn.close();
+				server.stop();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -43,7 +51,7 @@ public class TestH2Connection {
 	 * Create table statement
 	 */
 	private void runCreateStatement() {
-		String createStatement = "CREATE TABLE IF NOT EXISTS countries ("
+		String createStatement = "CREATE TABLE IF NOT EXISTS testCountries ("
 				+ "countryID int(11) NOT NULL AUTO_INCREMENT, "
 				+ "abbr varchar(5) NOT NULL, "
 				+ "name varchar(80) NOT NULL, "
@@ -66,16 +74,8 @@ public class TestH2Connection {
 	 */
 	private void runInsertStatement() {
 		String createInsertQuery = ""
-				+ "INSERT INTO `countries` (`countryID`, `abbr`, `name`, `countryName`, `ISO`, `numCode`, `phoneCode`) VALUES" + 
-				"(2, 'AL', 'ALBANIA', 'Albania', 'ALB', 8, 355)," + 
-				"(3, 'DZ', 'ALGERIA', 'Algeria', 'DZA', 12, 213)," + 
-				"(4, 'AS', 'AMERICAN SAMOA', 'American Samoa', 'ASM', 16, 1684)," + 
-				"(5, 'AD', 'ANDORRA', 'Andorra', 'AND', 20, 376)," + 
-				"(6, 'AO', 'ANGOLA', 'Angola', 'AGO', 24, 244)," + 
-				"(7, 'AI', 'ANGUILLA', 'Anguilla', 'AIA', 660, 1264)," + 
-				"(8, 'AQ', 'ANTARCTICA', 'Antarctica', NULL, NULL, 0)," + 
-				"(9, 'AG', 'ANTIGUA AND BARBUDA', 'Antigua and Barbuda', 'ATG', 28, 1268)," + 
-				"(10, 'AR', 'ARGENTINA', 'Argentina', 'ARG', 32, 54)";
+				+ "INSERT INTO `testCountries` (`countryID`, `abbr`, `name`, `countryName`, `ISO`, `numCode`, `phoneCode`) VALUES" + 
+				"(NULL, 'AL', 'ALBANIA', 'Albania', 'ALB', 8, 355);";
 		
 		try {
 			statement.executeUpdate(createInsertQuery);
@@ -88,7 +88,7 @@ public class TestH2Connection {
 	 * Select H2 Data
 	 */
 	private void runSelectStatement() {
-		String selectDataQuery = "SELECT * FROM countries where countryID IN (2,3,5,6)";
+		String selectDataQuery = "SELECT * FROM testCountries where countryID IN (2,3,5,6)";
 		
 		try {
 			ResultSet rs = statement.executeQuery(selectDataQuery);
@@ -105,6 +105,7 @@ public class TestH2Connection {
 	
 	
 	public static void main(String[] args) {
+		
 		TestH2Connection testConn = new TestH2Connection();
 		
 		testConn.setConnection();
